@@ -84,7 +84,7 @@
                             <tr>
                                 <td>{$params["username"]}</td>
                                 <td>{$params["password"]}</td>
-                                <td class="hidden-xs">{$status}</td>
+                                <td class="hidden-xs">{$last_use}</td>
                                 <td class="hidden-sm hidden-xs">{$logins}</td>
                                 
                                 {if $logintime eq '0'}

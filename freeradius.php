@@ -82,7 +82,7 @@ function freeradius_ClientArea($params){
       'total_bytes' => $collected['total'],
       'limit' => byte_size( $collected['usage_limit']),
       'limit_bytes' => $collected['usage_limit'],
-      'status' => $collected['status'],
+      'last_use' => $collected['status'],
       'params' => $params,
       'nodes' => $results,
     ),
@@ -322,6 +322,14 @@ function freeradius_TerminateAccount($params){
     freeradius_WHMCSReconnect();
     return "FreeRadius Database Query Error: ".$radiussqlerror;
   }
+  $query = "DELETE FROM radacct WHERE username='$username'";
+  $result = mysql_query($query,$freeradiussql);
+  if (!$result) {
+    $radiussqlerror = mysql_error();
+    freeradius_WHMCSReconnect();
+    return "FreeRadius Database Query Error: ".$radiussqlerror;
+  }
+  
   freeradius_WHMCSReconnect();
 
   return "success";
