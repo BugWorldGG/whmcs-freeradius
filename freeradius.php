@@ -120,6 +120,7 @@ function freeradius_username($email){
 
 function freeradius_CreateAccount($params){
   $username = $params["username"];
+  $diy_username = $params['customfields']['username'];
   $password = $params["password"];
   $groupname = $params["configoption1"];
   $firstname = $params["clientsdetails"]["firstname"];
@@ -128,7 +129,13 @@ function freeradius_CreateAccount($params){
   $phonenumber = $params["clientsdetails"]["phonenumber"];
 
   if( !$username ){
-    $username = freeradius_username( $email );
+    if( !$diy_username ){
+      $username = freeradius_username( $email );
+    }
+    
+    else {
+      $username = freeradius_username( $diy_username );
+    }
     update_query(
       "tblhosting",
       array(
@@ -138,6 +145,15 @@ function freeradius_CreateAccount($params){
         "id" => $params["serviceid"]
       )
     );
+    update_query(
+      "tblcustomfieldsvalues",
+      array(
+        "value" => $username
+        ),
+      array(
+        "relid" => $params["serviceid"]
+      )
+    );    
   }
 
   $sqlhost = $params["serverip"];
