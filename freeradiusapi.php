@@ -1,7 +1,7 @@
 <?php
 
 require(ROOTDIR."/configuration.php");
-$whmcs_api_key = 'test';
+$whmcs_api_key = '123456';
 #Return defaults
 $return["result"] = "error";
 $return["message"] = "Unknow WHMCS API error";

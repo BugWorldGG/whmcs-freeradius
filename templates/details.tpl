@@ -75,16 +75,16 @@
                             <tr>
                                 <th>账号</th>
                                 <th>密码</th>
-                                <th class="hidden-xs">上次使用</th>
+                                <th class="hidden-xs">最后使用</th>
                                 <th class="hidden-sm hidden-xs">登陆次数</th>
-                                <th class="hidden-sm hidden-xs">在线时长</th>
+                                <th class="hidden-sm hidden-xs">累计在线</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <td>{$params["username"]}</td>
                                 <td>{$params["password"]}</td>
-                                <td class="hidden-xs">{$last_update}</td>
+                                <td class="hidden-xs">{$status}</td>
                                 <td class="hidden-sm hidden-xs">{$logins}</td>
                                 
                                 {if $logintime eq '0'}
@@ -184,7 +184,7 @@
                         </thead>
 
                         <tbody>
-
+  
                             {foreach from=$nodes key=k item=node }
 
                             <tr>
@@ -200,20 +200,24 @@
                                     </button>
 
                                 </td>
-
+                                
+                                <td>#
+                                </td>
+                                <!--
                                 <td class="hidden-xs hidden-sm" data-hook="action">
 
-                                    <button name="qrcode" class="btn btn-primary btn-xs" data-params="{$node[2]|trim}:{$usage.passwd|trim}@{$node[1]|trim}:{$usage.port|trim}">
+                                    <button name="qrcode" class="btn btn-primary btn-xs" data-params="#">
                                         <i class="fa fa-qrcode"></i>
                                         二维码
                                     </button>
 
-                                    <button name="download" class="btn btn-primary btn-xs hidden-md" data-params="{$node[2]|trim}|{$usage.passwd|trim}|{$node[1]|trim}|{$usage.port|trim}">
+                                    <button name="download" class="btn btn-primary btn-xs hidden-md" data-params="#">
                                         <i class="fa fa-file-o"></i>
                                         配置文件
                                     </button>
-
-                                </td>
+                                    
+                                </td> 
+                                -->
 
                             </tr>
 

@@ -9,23 +9,29 @@ function freeradius_ConfigOptions(){
       "Description" => "FreeRADIUS group name"
     ),
     "usage_limit" => array (
-      "FriendlyName" => "Usage Limit",
+      "FriendlyName" => "流量限制",
       "Type" => "text",
       "Size" => "25",
       "Description" => "In bytes. 0 or blank to disable"
     ),
     "rate_limit" => array (
-      "FriendlyName" => "Rate Limit",
+      "FriendlyName" => "速度限制",
       "Type" => "text",
       "Size" => "25",
       "Description" => "Router specific. 0 or blank to disable"
     ),
     "session_limit" => array (
-      "FriendlyName" => "Session Limit",
+      "FriendlyName" => "客户端限制",
       "Type" => "text",
       "Size" => "5",
       "Description" => "Fixed number. 0 or balnk to disable"
-    )
+    ),
+    "线路列表" => array("Type" => "textarea", "Rows" => "3", "Cols" => "50", "Description" => "格式 xxx|服务器地址 一行一个"
+    ),
+    "重置流量" => array(
+      "Type"        => "dropdown",
+      "Options"     => array("1" => "需要重置", "0" => "不需要重置"),
+      "Description" => "是否需要重置流量"),    
   );
   return $configarray;
 }
@@ -51,8 +57,16 @@ function freeradius_AdminServicesTabFields($params){
 function freeradius_ClientArea($params){
   $username = $params["username"];
   $serviceid = $params["serviceid"];
-
+  
   $collected = collect_usage($params);
+  
+  $nodes = $params["configoption5"];
+  $results = array();
+
+  $nodes_split = explode("\r\n", $nodes);
+  foreach ( $nodes_split as $node) {
+      $results[] = explode('|', $node);
+    }
 
   return array(
     'tabOverviewReplacementTemplate' => 'details.tpl',
@@ -68,8 +82,9 @@ function freeradius_ClientArea($params){
       'total_bytes' => $collected['total'],
       'limit' => byte_size( $collected['usage_limit']),
       'limit_bytes' => $collected['usage_limit'],
-      'last_update' => $collected['status'],
+      'status' => $collected['status'],
       'params' => $params,
+      'nodes' => $results,
     ),
   );
 }
@@ -546,17 +561,36 @@ function collect_usage($params){
   $downloads = $data[3];
   $total = $data[4];
 
-  $query = "SELECT radacct.AcctStartTime as start, radacct.AcctStopTime as stop FROM radacct WHERE radacct.Username='$username' ORDER BY AcctStartTime DESC LIMIT 0,1";
+  $query = "SELECT radacct.AcctStartTime as start,radacct.AcctUpdateTime as updatetime,radacct.AcctStopTime as stop FROM radacct WHERE radacct.Username='$username' ORDER BY AcctStartTime DESC LIMIT 0,1";
   $result = mysql_query($query,$freeradiussql);
   $data = mysql_fetch_array($result);
   $sessions = mysql_num_rows($result);
   $start = $data[0];
-  $end = $data[1];
+  $updatetime = $data[1];
+  $end = $data[2];
 
-  $status = "正在使用";
+  $status = "";
   if( $end ) {
-    $status = $end;
+    $status = $end;  
+    }
+    
+  else {
+  
+    if( $updatetime ) {
+      $status = $updatetime;
+      $time_now = time();
+      if ( $time_now - strtotime($status) < 6*60)  {
+          $status = "正在使用";
+        }
+    }
+    else{
+      if( $start ) {
+        $status = $start;
+      }
+    }
   }
+
+  
   if( $sessions < 1 ){
     $status = "从未使用";
   }
@@ -599,19 +633,19 @@ function collect_usage($params){
 
 function secs_to_h($secs){
   $units = array(
-    "week"   => 7*24*3600,
-    "day"    => 24*3600,
-    "hour"   => 3600,
-    "minute" => 60
+    "周"   => 7*24*3600,
+    "天"    => 24*3600,
+    "时"   => 3600,
+    "分钟" => 60
   );
-  if ( $secs == 0 ) return "0 seconds";
-  if ( $secs < 60 ) return "{$secs} seconds";
+  if ( $secs == 0 ) return "0 秒";
+  if ( $secs < 60 ) return "{$secs} 秒";
   $s = "";
 
   foreach ( $units as $name => $divisor ) {
     if ( $quot = intval($secs / $divisor) ) {
       $s .= $quot." ".$name;
-      $s .= (abs($quot) > 1 ? "s" : "") . ", ";
+      $s .= (abs($quot) > 1 ? "" : "") . ", ";
       $secs -= $quot * $divisor;
     }
   }
