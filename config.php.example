@@ -15,6 +15,6 @@ $whmcs_api_password = 'admin';
 $whmcs_api_key = '1234567890';
 
 //Paths
-$radclient_path = '/usr/local/bin/radclient';
+$radclient_path = '/usr/share/radiusclient';
 
 ?>

@@ -55,8 +55,8 @@ function freeradius_ClientArea($params){
   $collected = collect_usage($params);
 
   return array(
-    'templatefile' => 'clientarea',
-    'vars' => array(
+    'tabOverviewReplacementTemplate' => 'details.tpl',
+    'templateVariables' => array(
       'logins' => $collected['logins'],
       'logintime' => secs_to_h( $collected['logintime'] ),
       'logintime_seconds' => $collected['logintime'],
@@ -68,7 +68,8 @@ function freeradius_ClientArea($params){
       'total_bytes' => $collected['total'],
       'limit' => byte_size( $collected['usage_limit']),
       'limit_bytes' => $collected['usage_limit'],
-      'status' => $collected['status'],
+      'last_update' => $collected['status'],
+      'params' => $params,
     ),
   );
 }
@@ -143,7 +144,7 @@ function freeradius_CreateAccount($params){
     freeradius_WHMCSReconnect();
     return "Username Already Exists";
   }
-  $query = "INSERT INTO radcheck (username, attribute, value, op) VALUES ('$username', 'User-Password', '$password', ':=')";
+  $query = "INSERT INTO radcheck (username, attribute, value, op) VALUES ('$username', 'Cleartext-Password', '$password', ':=')";
   $result = mysql_query($query,$freeradiussql);
   if( !$result ){
     $radiussqlerror = mysql_error();
@@ -335,7 +336,7 @@ function freeradius_ChangePassword($params){
     freeradius_WHMCSReconnect();
     return "User Not Found";
   }
-  $query = "UPDATE radcheck SET value='$password' WHERE username='$username' AND attribute='User-Password'";
+  $query = "UPDATE radcheck SET value='$password' WHERE username='$username' AND attribute='Cleartext-Password'";
   $result = mysql_query($query,$freeradiussql);
   if (!$result) {
     freeradius_WHMCSReconnect();
@@ -552,12 +553,12 @@ function collect_usage($params){
   $start = $data[0];
   $end = $data[1];
 
-  $status = "Offline";
+  $status = "正在使用";
   if( $end ) {
-    $status = "Logged in at ".$start;
+    $status = $end;
   }
   if( $sessions < 1 ){
-    $status = "No logins";
+    $status = "从未使用";
   }
 
   freeradius_WHMCSReconnect();
